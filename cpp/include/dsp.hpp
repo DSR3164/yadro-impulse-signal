@@ -53,11 +53,21 @@ void upsample(const std::vector<T> &symbols, std::vector<T> &upsampled, size_t u
         upsampled[i * up] = symbols[i];
 }
 
+template <typename T>
+void cutoff(std::vector<T> &vec, size_t samples_per_period)
+{
+    vec.erase(vec.begin(), vec.begin() + 2 * samples_per_period);
+    vec.erase(vec.end() - 2 * samples_per_period, vec.end());
+}
+
 void generate_sin(std::vector<double> &signal, double frequency = 50.0f, double phase = 0.0f, double sample_rate = 100.0f, double seconds = 1.0f);
 
-std::vector<double> upsampling(std::vector<double> &signal, std::vector<double> &upsampled_signal);
-std::vector<int16_t> upsampling_int(std::vector<int16_t> &signal, std::vector<int16_t> &upsampled_signal);
+std::vector<double> upsampling(std::vector<double> &signal, std::vector<double> &upsampled_signal, double target_f = 25.0, double sample_rate = 100.0);
+std::vector<int16_t> upsampling_int(std::vector<int16_t> &signal, std::vector<int16_t> &upsampled_signal, double target_f = 25.0, double sample_rate = 100.0);
 
 std::vector<double> fir_lowpass_sinc_windowed(size_t numTaps, double f_c);
 void filter(const std::vector<double> &a, const std::vector<double> &b, std::vector<double> &y);
 void filter_int(const std::vector<int16_t> &a, const std::vector<double> &b, std::vector<int16_t> &y);
+
+std::vector<double> perform_float_test();
+std::vector<double> perform_int_test();

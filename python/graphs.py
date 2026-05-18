@@ -42,22 +42,25 @@ sin_cu = load_signal("files/signal_cu.bin") # Квантованный сину�
 
 h = load_signal("files/h.bin") # Импульсная характеристика фильтра
 
+errors_float = load_signal("files/errors_float.bin")
+errors_int = load_signal("files/errors_int.bin")
+
 fc1 = 1 / 100
 fc2 = fc1 / 2
 
-sin_u_normalized_to_int16 = sin_u / np.max(np.abs(sin_u)) * np.max(np.abs(sin_cu))
-sin_сu_normalized_to_int16 = sin_cu
+sin_normalized_to_int16 = sin / np.max(np.abs(sin)) * np.max(np.abs(sin_c))
+sin_с_normalized_to_int16 = sin_c
 
-len_min = min(len(sin_сu_normalized_to_int16), len(sin_u_normalized_to_int16))
-sin_cu_t = sin_сu_normalized_to_int16[:len_min]
-sin_u_t = sin_u_normalized_to_int16[:len_min]
+len_min = min(len(sin_с_normalized_to_int16), len(sin_normalized_to_int16))
+sin_cu_t = sin_с_normalized_to_int16[:len_min]
+sin_u_t = sin_normalized_to_int16[:len_min]
 
 error = sin_u_t - sin_cu_t
 signal_power = np.mean(np.float64(sin_cu_t) ** 2)
 noise_power = np.mean(error ** 2)
 
 snr = 10 * np.log10(signal_power / noise_power)
-print(f"SNR (сигнал к ошибке квантования после upsampling): {snr:.2f}dB ")
+print(f"SQNR (мощность сигнала к ошибке квантования): {snr:.2f}dB ")
 
 Fsinc = np.fft.fftshift(np.fft.fft(h))
 Xsinc = np.fft.fftshift(np.fft.fftfreq(len(h), fc1))
@@ -73,6 +76,32 @@ Xcf = np.fft.fftshift(np.fft.fftfreq(len(sin_cu), fc2))
 
 Ffc2 = np.fft.fftshift(np.fft.fft(sin_2fc))
 Xfc2 = np.fft.fftshift(np.fft.fftfreq(len(sin_2fc), fc2))
+
+plt.figure(figsize = [12, 4], dpi=100)
+plt.plot(errors_float, label="Errors")
+plt.grid()
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("Magnitude dB")
+plt.tight_layout()
+plt.savefig('docs/Errors float')
+
+plt.figure(figsize = [12, 4], dpi=100)
+plt.plot(errors_int, label="Errors")
+plt.grid()
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("Magnitude dB")
+plt.tight_layout()
+plt.savefig('docs/Errors int')
+
+plt.figure(figsize = [12, 4], dpi=100)
+plt.plot(errors_float, label="Errors float")
+plt.plot(errors_int, label="Errors int")
+plt.grid()
+plt.legend()
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("Magnitude dB")
+plt.tight_layout()
+plt.savefig('docs/Errors')
 
 plt.figure(figsize = [12, 4], dpi=100)
 plt.plot(Xsinc, 20 * np.log10(np.abs(Fsinc) + 1e-12), label="Filter spectrum")
